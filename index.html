@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>jellybelly</title>
+
+  <link href="styles.css" rel="stylesheet" type="text/css" media="all">
+
+</head>
+
+<body>
+  <br>
+  <div>GUESS JELLY BELLY FLAVOR</div>
+  <br>
+  <div>START BY PICKING A LETTER</div>
+  <br>
+  <div id='placeHolder'></div>
+  <br>
+  <div>WINS</div>
+  <div id="wins"></div>
+  <br>
+  <div>REMAINING GUESSES</div>
+  <div id='numLives'></div>
+  <br>
+  <div>LETTERS ALREADY USED</div>
+  <div id='used'></div>
+  <img src="jelly-belly.jpg" alt="jellybelly">
+  <audio id="play" src="http://www.soundjay.com/button/beep-07.wav"></audio>
+
+  <script>
+
+      var wordList = ['A AND W CREAM SODA','A AND W ROOT BEER', 'BERRY BLUE', 'BLUEBERRY', 'BUBBLE GUM', 'CAPPUCCINO', 'CINNAMON', 'COTTON CANDY','FRENCH VANILLA', 'ISLAND PUNCH', 'KIWI', 'LEMON DROP', 'LEMON LIME','LICORICE', 'MARGARITA','PINA COLADA', 'RASPBERRY','STRAWBERRY DAIQUIRI', 'SUNKIST ORANGE', 'TOP BANANA','VERY CHERRY', 'WATERMELON', 'WILD BLACKBERRY'];
+
+      var htmlText ="";
+      var player = {
+        strCurrent : "",
+        input       : "",
+        usedInput   : "",
+        placeHolder : "",
+        wins        : 0,
+        wrongInputCounter  : 6
+        };
+
+      function playSound () {
+        document.getElementById('play').play();
+      }
+
+      function startGame(){
+        player.placeHolder = "";
+        player.usedInput = "";
+        player.input = "";
+        player.wrongInputCounter = 6;
+        var randomIndex = Math.floor(Math.random() * wordList.length);
+        player.strCurrent = wordList[randomIndex];
+        console.log("Current Word: " + player.strCurrent);
+        console.log("List Index: " + randomIndex);
+        document.getElementById('numLives').innerHTML = 6;
+        makePlaceHolder();
+        document.getElementById('used').innerHTML = player.input;
+      }
+
+      function guess(){
+        var re = new RegExp(player.input, 'gi');
+        var str = player.strCurrent;
+        while ((match = re.exec(str)) != null) {
+
+          player.placeHolder = player.placeHolder.substr(0, match.index * 2) + player.input
+           + player.placeHolder.substr((match.index * 2) + 1);
+
+      }
+          htmlText= player.placeHolder.replace(/\s/g, '&nbsp;');
+          console.log("current word in guess():" + player.strCurrent);
+          console.log("current input in guess(): " + player.input);
+          console.log("check placeHolder: " + player.placeHolder);
+          document.getElementById("placeHolder").innerHTML = htmlText;
+
+      }
+
+      function makePlaceHolder(){
+        var space = " ";
+        var re = new RegExp(space, 'g');
+        var str = player.strCurrent;
+        player.placeHolder = Array(player.strCurrent.length + 1).join("_");
+
+        while ((match = re.exec(str)) != null) {
+          player.placeHolder = player.placeHolder.substr(0, match.index) + " "
+           + player.placeHolder.substr(match.index + 1);
+           
+        }
+        player.placeHolder = player.placeHolder.split("").join(" ");
+        console.log("check space: " + player.placeHolder);
+
+        var placeHolderDiv = document.getElementById("placeHolder");
+        console.log("div: " + placeHolderDiv);
+
+        htmlText= player.placeHolder.replace(/\s/g, '&nbsp;');
+        document.getElementById("placeHolder").innerHTML = htmlText;
+      }
+
+     startGame();
+     document.onkeyup = function(event) {
+            var placeHolderMin, strCurrentMin;
+            player.input = event.key.toUpperCase();
+            console.log("used input? " + player.usedInput.indexOf(player.input));
+
+            if (player.wrongInputCounter === 0){
+              startGame();
+            }
+
+            if (player.usedInput.indexOf(player.input) === -1 ){
+                player.usedInput = player.usedInput + player.input;
+                var usedHtml = player.usedInput.split("").join(" ");
+                usedHtml= usedHtml.replace(/\s/g, '&nbsp;');
+
+                document.getElementById('used').innerHTML = usedHtml;
+
+
+                if (player.strCurrent.indexOf(player.input) >= 0){
+                  guess();
+
+                  placeHolderMin = player.placeHolder.replace(/\s/g, '');
+                  strCurrentMin = player.strCurrent.replace(/\s/g, '');
+
+                    if (placeHolderMin === strCurrentMin){
+                      player.wins++;
+                      document.getElementById('wins').innerHTML = player.wins;
+                      startGame();
+                    }
+
+                }
+
+                else {
+                  console.log("Word does not contain the letter " +  player.input );
+                  playSound();
+                  player.wrongInputCounter--;
+                  console.log("remaining lives#: " + player.wrongInputCounter);
+                  document.getElementById('numLives').innerHTML = player.wrongInputCounter;
+                  if (player.wrongInputCounter <= 0 ){
+                    console.log("Lost game.  Start new game.");
+                    startGame();
+                  }
+                }
+            }
+            else {
+              playSound();
+              console.log("Inappropriate key or already used letter.  Please select a new letter.");
+            }
+      };
+
+  </script>
+  
+</body>
+</html>
